@@ -4,9 +4,14 @@
   "packageManager": "pnpm@8.6.5",
   "description": "a js utils library",
   "author": "inottn<https://github.com/inottn>",
+  "homepage": "https://github.com/inottn/fp-utils",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "index.d.ts",
+  "files": [
+    "dist",
+    "*.d.ts"
+  ],
   "exports": {
     ".": {
       "types": "./index.d.ts",
@@ -31,6 +36,9 @@
     "typescript"
   ],
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/inottn/fp-utils/issues"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.2",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
