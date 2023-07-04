@@ -13,3 +13,4 @@ coverage
 
 # dist file
 dist
+index.d.ts
