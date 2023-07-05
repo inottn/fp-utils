@@ -16,11 +16,11 @@ export default [
     input,
     output: [
       {
-        file: input.replace('src/', 'dist/').replace('.ts', '.js'),
+        file: input.replace('src/', 'dist/').replace('.ts', '-esm.js'),
         format: 'esm',
       },
       {
-        file: input.replace('src/', 'dist/').replace('.ts', '.js'),
+        file: input.replace('src/', 'dist/').replace('.ts', '-cjs.js'),
         format: 'cjs',
       },
       {
