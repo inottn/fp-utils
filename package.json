@@ -1,12 +1,12 @@
 {
   "name": "@inottn/fp-utils",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "packageManager": "pnpm@8.6.5",
-  "description": "a js utils library",
+  "description": "A js utils library",
   "author": "inottn<https://github.com/inottn>",
   "homepage": "https://github.com/inottn/fp-utils",
-  "main": "dist/index.cjs",
-  "module": "dist/index.mjs",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "index.d.ts",
   "files": [
     "dist",
@@ -15,8 +15,8 @@
   "exports": {
     ".": {
       "types": "./index.d.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
+      "require": "./dist/index.js",
+      "import": "./dist/index.js"
     }
   },
   "scripts": {
