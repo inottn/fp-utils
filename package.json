@@ -26,6 +26,9 @@
     "lint": "eslint ./src --ext .js,.ts,.mjs,.cjs",
     "prepare": "husky install"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "nano-staged": {
     "*.{ts,tsx,js,mjs,less}": "prettier --write",
     "*.{ts,tsx,js,mjs}": "eslint --fix"
@@ -38,6 +41,10 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/inottn/fp-utils/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:inottn/fp-utils.git"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.2",
