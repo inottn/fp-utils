@@ -1,4 +1,5 @@
-import { isFunction, isPromise, withResolvers } from '../utils';
+import { withResolvers } from '../withResolvers';
+import { isFunction, isPromise } from '../utils';
 
 export type pollOptions<T> = {
   fn: (args: { retried: number; clear: () => void }) => T | Promise<T>;
