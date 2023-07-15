@@ -1,5 +1,5 @@
-export function lock<Args extends unknown[], AwaitedType>(
-  fn: (...args: Args) => Promise<AwaitedType>
+export function lock<Args extends unknown[], ReturnValue>(
+  fn: (...args: Args) => ReturnValue
 ) {
   let locked = false;
   let timer: ReturnType<typeof setTimeout>;
