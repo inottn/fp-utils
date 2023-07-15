@@ -12,6 +12,7 @@ describe('lock', () => {
     lockFn.lock();
     lockFn();
     expect(fn).not.toBeCalled();
+    expect(lockFn.isLocked()).toBe(true);
   });
 
   it('should unlock function after calling the unlock method', () => {
@@ -20,10 +21,12 @@ describe('lock', () => {
     lockFn.lock();
     lockFn();
     expect(fn).not.toBeCalled();
+    expect(lockFn.isLocked()).toBe(true);
 
     lockFn.unlock();
     lockFn();
     expect(fn).toBeCalled();
+    expect(lockFn.isLocked()).toBe(false);
   });
 
   it('should lock and invoke function after calling the lockAndInvoke method', () => {
@@ -31,6 +34,7 @@ describe('lock', () => {
     const lockFn = lock(fn);
     lockFn.lockAndInvoke();
     expect(fn).toBeCalled();
+    expect(lockFn.isLocked()).toBe(true);
 
     lockFn();
     expect(fn).toBeCalledTimes(1);
@@ -38,6 +42,7 @@ describe('lock', () => {
     lockFn.unlock();
     lockFn();
     expect(fn).toBeCalledTimes(2);
+    expect(lockFn.isLocked()).toBe(false);
   });
 
   it('should lock the time', () => {
@@ -48,10 +53,12 @@ describe('lock', () => {
     lockFn.lock(100);
     lockFn();
     expect(fn).not.toBeCalled();
+    expect(lockFn.isLocked()).toBe(true);
 
     vi.runAllTimers();
     lockFn();
     expect(fn).toBeCalled();
+    expect(lockFn.isLocked()).toBe(false);
 
     vi.useRealTimers();
   });
