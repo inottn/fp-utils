@@ -21,6 +21,8 @@ export function lock<Args extends unknown[], AwaitedType>(
     locked = false;
   };
 
+  const isLocked = () => locked;
+
   const returnFn = (...args: Args) => {
     if (locked) return;
     return fn(...args);
@@ -29,6 +31,7 @@ export function lock<Args extends unknown[], AwaitedType>(
   returnFn.lock = lock;
   returnFn.lockAndInvoke = lockAndInvoke;
   returnFn.unlock = unlock;
+  returnFn.isLocked = isLocked;
 
   return returnFn;
 }

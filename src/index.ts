@@ -1,5 +1,6 @@
 export * from './cache';
 export * from './clamp';
+export * from './lock';
 export * from './noop';
 export * from './poll';
 export * from './retry';
