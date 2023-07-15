@@ -2,17 +2,17 @@ import { withResolvers } from '../withResolvers';
 import { isFunction, isPromise } from '../utils';
 
 export type pollOptions<T> = {
-  fn: (args: { retried: number; clear: () => void }) => T | Promise<T>;
+  fn: (args: { retried: number; cancel: () => void }) => T | Promise<T>;
   validate?: (value: T) => boolean;
   interval: number | ((args: { retried: number }) => number);
   retries?: number | ((args: { retried: number }) => boolean);
-  onClear?: () => void;
+  onCancel?: () => void;
   onSuccess?: (value: T) => void;
   onFail?: () => void;
 };
 
 export function poll<T>(args: pollOptions<T>) {
-  const { fn, validate, interval, retries, onClear, onSuccess, onFail } = args;
+  const { fn, validate, interval, retries, onCancel, onSuccess, onFail } = args;
   const promisify = !isFunction(onSuccess) && !isFunction(onFail);
   let resolvers: ReturnType<typeof withResolvers> | null;
   let retried = 0;
@@ -41,7 +41,7 @@ export function poll<T>(args: pollOptions<T>) {
 
   const loop = () => {
     retried++;
-    const result = fn({ retried, clear });
+    const result = fn({ retried, cancel });
 
     if (isPromise(result)) {
       result.then(process);
@@ -50,9 +50,9 @@ export function poll<T>(args: pollOptions<T>) {
     }
   };
 
-  const clear = () => {
+  const cancel = () => {
     clearTimeout(timer);
-    if (isFunction(onClear)) onClear();
+    if (isFunction(onCancel)) onCancel();
     if (promisify) resolvers = null;
   };
 
@@ -60,7 +60,7 @@ export function poll<T>(args: pollOptions<T>) {
     loop();
     if (promisify) return resolvers?.promise;
   };
-  returnFn.clear = clear;
+  returnFn.cancel = cancel;
 
   return returnFn;
 }

@@ -142,21 +142,21 @@ describe('poll', () => {
 
   it('should work after calling clear method', async () => {
     const fn = vi.fn();
-    const onClear = vi.fn();
+    const onCancel = vi.fn();
     const pollFn = poll({
       fn,
       interval: 1000,
-      onClear,
+      onCancel,
     });
 
     vi.useFakeTimers();
     pollFn();
     vi.advanceTimersToNextTimer();
-    pollFn.clear();
+    pollFn.cancel();
     expect(vi.getTimerCount()).toBe(0);
     vi.useRealTimers();
 
-    // should call onClear callback
-    expect(onClear).toBeCalledTimes(1);
+    // should call onCancel callback
+    expect(onCancel).toBeCalledTimes(1);
   });
 });
