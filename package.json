@@ -1,6 +1,6 @@
 {
   "name": "@inottn/fp-utils",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "packageManager": "pnpm@8.6.5",
   "description": "A js utils library",
   "author": "inottn<https://github.com/inottn>",
@@ -24,7 +24,8 @@
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "lint": "eslint ./src --ext .js,.ts,.mjs,.cjs",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "prepublish": "npm run build"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
