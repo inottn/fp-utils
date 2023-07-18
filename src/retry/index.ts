@@ -5,18 +5,17 @@ export function retry<Args extends unknown[], AwaitedType>(
   return function (...args: Args) {
     let retried = 0;
 
-    const inner = async (...args: Args): Promise<AwaitedType> => {
-      const promise = fn(...args);
-
-      try {
-        const data = await promise;
-        retried = 0;
-        return data;
-      } catch (error) {
-        retried++;
-        if (retried >= retries) throw error;
-        return await inner(...args);
-      }
+    const inner = (...args: Args): Promise<AwaitedType> => {
+      return fn(...args)
+        .then((data) => {
+          retried = 0;
+          return data;
+        })
+        .catch((error) => {
+          retried++;
+          if (retried >= retries) throw error;
+          return inner(...args);
+        });
     };
 
     return inner(...args);
