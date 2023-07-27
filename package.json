@@ -1,6 +1,6 @@
 {
   "name": "@inottn/fp-utils",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "packageManager": "pnpm@8.6.5",
   "description": "A js utils library",
   "author": "inottn<https://github.com/inottn>",
