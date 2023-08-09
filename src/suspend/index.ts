@@ -7,6 +7,8 @@ export function suspend<Args extends unknown[], AwaitedType>(
 ) {
   let suspended = false;
   let timer: ReturnType<typeof setTimeout>;
+  let resumePromise = Promise.resolve();
+  let resumeResolve: ReturnType<typeof withResolvers<void>>['resolve'];
   const queue: {
     args: Args;
     resolve: ReturnType<typeof withResolvers<AwaitedType>>['resolve'];
@@ -14,6 +16,10 @@ export function suspend<Args extends unknown[], AwaitedType>(
   }[] = [];
 
   const suspend = (time?: number) => {
+    if (!suspended) {
+      ({ promise: resumePromise, resolve: resumeResolve } =
+        withResolvers<void>());
+    }
     suspended = true;
     if (typeof time === 'number') {
       timer = setTimeout(resume, time);
@@ -26,9 +32,14 @@ export function suspend<Args extends unknown[], AwaitedType>(
   };
 
   const resume = () => {
-    clearTimeout(timer);
     suspended = false;
+    clearTimeout(timer);
+    resumeResolve();
     flushQueue();
+  };
+
+  const waitForResume = () => {
+    return resumePromise;
   };
 
   const flushQueue = () => {
@@ -54,6 +65,7 @@ export function suspend<Args extends unknown[], AwaitedType>(
   returnFn.suspend = suspend;
   returnFn.suspendAndInvoke = suspendAndInvoke;
   returnFn.resume = resume;
+  returnFn.waitForResume = waitForResume;
   returnFn.isSuspended = isSuspended;
 
   return returnFn;
