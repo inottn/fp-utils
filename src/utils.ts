@@ -7,8 +7,8 @@ export const isObject = (val: unknown): val is Record<any, any> =>
 export const isPromise = <T = any>(val: unknown): val is Promise<T> =>
   isObject(val) && isFunction(val.then) && isFunction(val.catch);
 
-export const isNonEmptyArray = (value: unknown) =>
-  Array.isArray(value) && value.length > 0;
+export const isNonEmptyArray = (val: unknown) =>
+  Array.isArray(val) && val.length > 0;
 
-export const isEmptyArray = (value: unknown) =>
-  Array.isArray(value) && value.length === 0;
+export const isEmptyArray = (val: unknown) =>
+  Array.isArray(val) && val.length === 0;

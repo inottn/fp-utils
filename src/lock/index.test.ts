@@ -37,11 +37,12 @@ describe('lock', () => {
     expect(lockFn.isLocked()).toBe(true);
 
     lockFn();
+    lockFn();
+    lockFn();
     expect(fn).toBeCalledTimes(1);
 
     lockFn.unlock();
-    lockFn();
-    expect(fn).toBeCalledTimes(2);
+    expect(fn).toBeCalledTimes(4);
     expect(lockFn.isLocked()).toBe(false);
   });
 
@@ -61,5 +62,18 @@ describe('lock', () => {
     expect(lockFn.isLocked()).toBe(false);
 
     vi.useRealTimers();
+  });
+
+  it('waitForUnlock should work', async () => {
+    const fn = vi.fn();
+    const lockFn = lock(fn);
+    lockFn.lock();
+    const unlockPromise = lockFn.waitForUnlock();
+    lockFn.lock();
+    expect(unlockPromise).toBe(lockFn.waitForUnlock());
+
+    lockFn.unlock();
+    lockFn.lock();
+    expect(unlockPromise).not.toBe(lockFn.waitForUnlock());
   });
 });

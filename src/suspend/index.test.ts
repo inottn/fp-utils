@@ -37,12 +37,11 @@ describe('suspend', () => {
     expect(suspendFn.isSuspended()).toBe(true);
 
     suspendFn();
-    suspendFn();
-    suspendFn();
     expect(fn).toBeCalledTimes(1);
 
     suspendFn.resume();
-    expect(fn).toBeCalledTimes(4);
+    suspendFn();
+    expect(fn).toBeCalledTimes(2);
     expect(suspendFn.isSuspended()).toBe(false);
   });
 
@@ -62,18 +61,5 @@ describe('suspend', () => {
     expect(suspendFn.isSuspended()).toBe(false);
 
     vi.useRealTimers();
-  });
-
-  it('waitForResume should work', async () => {
-    const fn = vi.fn();
-    const suspendFn = suspend(fn);
-    suspendFn.suspend();
-    const resumePromise = suspendFn.waitForResume();
-    suspendFn.suspend();
-    expect(resumePromise).toBe(suspendFn.waitForResume());
-
-    suspendFn.resume();
-    suspendFn.suspend();
-    expect(resumePromise).not.toBe(suspendFn.waitForResume());
   });
 });
