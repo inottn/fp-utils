@@ -12,3 +12,6 @@ export const isNonEmptyArray = (val: unknown) =>
 
 export const isEmptyArray = (val: unknown) =>
   Array.isArray(val) && val.length === 0;
+
+export const isUndefined = (val: unknown): val is undefined =>
+  typeof val === 'undefined';
