@@ -1,6 +1,6 @@
 export function retry<Args extends unknown[], AwaitedType>(
   fn: (...args: Args) => Promise<AwaitedType>,
-  retries: number
+  retries: number,
 ) {
   return function (...args: Args) {
     let retried = 0;
@@ -12,8 +12,8 @@ export function retry<Args extends unknown[], AwaitedType>(
           return data;
         })
         .catch((error) => {
-          retried++;
           if (retried >= retries) throw error;
+          retried++;
           return inner(...args);
         });
     };

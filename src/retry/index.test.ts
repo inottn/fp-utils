@@ -11,9 +11,9 @@ describe('retry', () => {
     const retries = 10;
     const retryFn = retry(fn, retries);
     await expect(retryFn()).rejects.toThrow('error');
-    expect(fn).toBeCalledTimes(retries);
+    expect(fn).toBeCalledTimes(retries + 1);
     await expect(retryFn()).rejects.toThrow('error');
-    expect(fn).toBeCalledTimes(retries * 2);
+    expect(fn).toBeCalledTimes((retries + 1) * 2);
   });
 
   it('should not retry when the returned promise is fulfilled', async () => {
