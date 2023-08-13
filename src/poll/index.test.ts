@@ -23,7 +23,7 @@ describe('poll', () => {
     vi.useRealTimers();
 
     // should stop polling when exceeding the maximum number of retries
-    expect(fn).toHaveBeenCalledTimes(retries);
+    expect(fn).toHaveBeenCalledTimes(retries + 1);
 
     // should call onFail callback
     expect(onFail).toHaveBeenCalledTimes(1);
@@ -54,9 +54,9 @@ describe('poll', () => {
 
     // should receive the correct parameters
     expect(retries.mock.calls).toEqual([
+      [{ retried: 0 }],
       [{ retried: 1 }],
       [{ retried: 2 }],
-      [{ retried: 3 }],
     ]);
 
     // should call onFail callback

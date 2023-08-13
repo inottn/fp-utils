@@ -34,13 +34,13 @@ export function poll<T>(args: pollOptions<T>) {
     } else {
       timer = setTimeout(
         loop,
-        isFunction(interval) ? interval({ retried }) : interval
+        isFunction(interval) ? interval({ retried }) : interval,
       );
     }
+    retried++;
   };
 
   const loop = () => {
-    retried++;
     const result = fn({ retried, cancel });
 
     if (isPromise(result)) {
