@@ -1,6 +1,10 @@
+import { sleep } from '../sleep';
+import { isFunction } from '../utils';
+
 export function retry<Args extends unknown[], AwaitedType>(
   fn: (...args: Args) => Promise<AwaitedType>,
   retries: number,
+  interval?: number | ((args: { retried: number }) => number),
 ) {
   return function (...args: Args) {
     let retried = 0;
@@ -14,6 +18,14 @@ export function retry<Args extends unknown[], AwaitedType>(
         .catch((error) => {
           if (retried >= retries) throw error;
           retried++;
+
+          if (interval) {
+            return sleep(
+              isFunction(interval) ? interval({ retried }) : interval,
+              () => inner(...args),
+            );
+          }
+
           return inner(...args);
         });
     };

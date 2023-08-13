@@ -27,4 +27,24 @@ describe('retry', () => {
     await expect(retryFn()).resolves.toBe('resolved');
     expect(fn).toBeCalledTimes(3);
   });
+
+  it('should retry after the specified interval', async () => {
+    vi.useFakeTimers();
+
+    const interval = 1000;
+    const fn = vi
+      .fn()
+      .mockRejectedValueOnce('error')
+      .mockRejectedValueOnce('error')
+      .mockResolvedValueOnce('resolved');
+
+    const retryFn = retry(fn, 4, interval);
+    retryFn();
+    await vi.advanceTimersByTimeAsync(interval);
+    expect(fn).toBeCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(interval);
+    expect(fn).toBeCalledTimes(3);
+
+    vi.useRealTimers();
+  });
 });
