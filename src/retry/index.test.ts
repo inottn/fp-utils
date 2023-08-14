@@ -47,4 +47,28 @@ describe('retry', () => {
 
     vi.useRealTimers();
   });
+
+  it('interval option can accept function with the retried param', async () => {
+    vi.useFakeTimers();
+
+    const interval = 1000;
+    const intervalFn = vi.fn().mockReturnValue(interval);
+    const fn = vi
+      .fn()
+      .mockRejectedValueOnce('error')
+      .mockRejectedValueOnce('error')
+      .mockResolvedValueOnce('resolved');
+
+    const retryFn = retry(fn, 4, intervalFn);
+    retryFn();
+    await vi.advanceTimersByTimeAsync(interval);
+    expect(fn).toBeCalledTimes(2);
+    expect(intervalFn.mock.calls).toEqual([[{ retried: 0 }], [{ retried: 1 }]]);
+
+    await vi.advanceTimersByTimeAsync(interval);
+    expect(fn).toBeCalledTimes(3);
+    expect(intervalFn.mock.calls).toEqual([[{ retried: 0 }], [{ retried: 1 }]]);
+
+    vi.useRealTimers();
+  });
 });

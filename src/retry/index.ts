@@ -17,16 +17,17 @@ export function retry<Args extends unknown[], AwaitedType>(
         })
         .catch((error) => {
           if (retried >= retries) throw error;
+
+          const res = interval
+            ? sleep(
+                isFunction(interval) ? interval({ retried }) : interval,
+                () => inner(...args),
+              )
+            : inner(...args);
+
           retried++;
 
-          if (interval) {
-            return sleep(
-              isFunction(interval) ? interval({ retried }) : interval,
-              () => inner(...args),
-            );
-          }
-
-          return inner(...args);
+          return res;
         });
     };
 
