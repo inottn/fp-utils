@@ -1,36 +1,32 @@
 import { withResolvers } from '../withResolvers';
 import { isFunction, isPromise } from '../utils';
+import type { MaybePromise } from '../types';
 
 export type pollOptions<T> = {
-  fn: (args: { retried: number; cancel: () => void }) => T | Promise<T>;
+  fn: (args: { retried: number; cancel: () => void }) => MaybePromise<T>;
   validate?: (value: T) => boolean;
   interval: number | ((args: { retried: number }) => number);
   retries?: number | ((args: { retried: number }) => boolean);
-  onCancel?: () => void;
   onSuccess?: (value: T) => void;
-  onFail?: () => void;
+  onFail?: (reason?: any) => void;
+  onCancel?: () => void;
 };
 
 export function poll<T>(args: pollOptions<T>) {
   const { fn, validate, interval, retries, onCancel, onSuccess, onFail } = args;
-  const promisify = !isFunction(onSuccess) && !isFunction(onFail);
-  let resolvers: ReturnType<typeof withResolvers> | null;
+  const { promise, resolve, reject } = withResolvers<T>();
   let retried = 0;
   let timer: ReturnType<typeof setTimeout>;
-
-  if (promisify) {
-    resolvers = withResolvers();
-  }
 
   const process = (value: T) => {
     if (isFunction(validate) && validate(value)) {
       if (isFunction(onSuccess)) onSuccess(value);
-      if (promisify) resolvers?.resolve(value);
+      resolve(value);
     } else if (
       isFunction(retries) ? !retries({ retried }) : retried === retries
     ) {
-      if (isFunction(onFail)) onFail();
-      if (promisify) resolvers?.reject();
+      if (isFunction(onFail)) onFail(value);
+      reject(value);
     } else {
       timer = setTimeout(
         loop,
@@ -44,7 +40,7 @@ export function poll<T>(args: pollOptions<T>) {
     const result = fn({ retried, cancel });
 
     if (isPromise(result)) {
-      result.then(process);
+      result.then(process).catch(process);
     } else {
       process(result);
     }
@@ -53,14 +49,15 @@ export function poll<T>(args: pollOptions<T>) {
   const cancel = () => {
     clearTimeout(timer);
     if (isFunction(onCancel)) onCancel();
-    if (promisify) resolvers = null;
   };
 
-  const returnFn = () => {
-    loop();
-    if (promisify) return resolvers?.promise;
-  };
-  returnFn.cancel = cancel;
+  loop();
 
-  return returnFn;
+  return Object.assign(promise, { cancel });
 }
+
+poll.create = function <T>(args: pollOptions<T>) {
+  return function () {
+    return poll(args);
+  };
+};

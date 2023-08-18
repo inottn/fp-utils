@@ -6,61 +6,79 @@ describe('poll', () => {
     expect(poll).toBeDefined();
   });
 
-  it('should work when the retries passed is a number', () => {
-    const fn = vi.fn();
-    const retries = 5;
-    const onFail = vi.fn();
-    const pollFn = poll({
-      fn,
-      retries,
-      interval: 1000,
-      onFail,
-    });
+  it('should work when the retries passed is a number', async () => {
+    const mockTypeList = [
+      'mockRejectedValue',
+      'mockResolvedValue',
+      'mockReturnValue',
+    ] as const;
 
-    vi.useFakeTimers();
-    pollFn();
-    vi.runAllTimers();
-    vi.useRealTimers();
+    for (const type of mockTypeList) {
+      const fn = vi.fn()[type](type);
+      const retries = 5;
+      const onFail = vi.fn();
 
-    // should stop polling when exceeding the maximum number of retries
-    expect(fn).toHaveBeenCalledTimes(retries + 1);
+      vi.useFakeTimers();
+      const promise = poll({
+        fn,
+        retries,
+        interval: 1000,
+        onFail,
+      });
+      expect(promise).rejects.toThrowError(type);
+      await vi.runAllTimersAsync();
+      vi.useRealTimers();
 
-    // should call onFail callback
-    expect(onFail).toHaveBeenCalledTimes(1);
+      // should stop polling when exceeding the maximum number of retries
+      expect(fn).toHaveBeenCalledTimes(retries + 1);
+
+      // should call onFail callback
+      expect(onFail).toHaveBeenCalledTimes(1);
+      expect(onFail.mock.lastCall).toEqual([type]);
+    }
   });
 
-  it('should work when the retries passed is a function', () => {
-    const fn = vi.fn();
-    const retries = vi
-      .fn()
-      .mockReturnValueOnce(true)
-      .mockReturnValueOnce(true)
-      .mockReturnValueOnce(false);
-    const onFail = vi.fn();
-    const pollFn = poll({
-      fn,
-      retries,
-      interval: 1000,
-      onFail,
-    });
+  it('should work when the retries passed is a function', async () => {
+    const mockTypeList = [
+      'mockRejectedValue',
+      'mockResolvedValue',
+      'mockReturnValue',
+    ] as const;
 
-    vi.useFakeTimers();
-    pollFn();
-    vi.runAllTimers();
-    vi.useRealTimers();
+    for (const type of mockTypeList) {
+      const fn = vi.fn()[type](type);
+      const retries = vi
+        .fn()
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(false);
+      const onFail = vi.fn();
 
-    // should stop polling when retries function return false
-    expect(fn).toHaveBeenCalledTimes(3);
+      vi.useFakeTimers();
+      const promise = poll({
+        fn,
+        retries,
+        interval: 1000,
+        onFail,
+      });
+      expect(promise).rejects.toThrowError(type);
+      await vi.runAllTimersAsync();
+      vi.useRealTimers();
 
-    // should receive the correct parameters
-    expect(retries.mock.calls).toEqual([
-      [{ retried: 0 }],
-      [{ retried: 1 }],
-      [{ retried: 2 }],
-    ]);
+      // should stop polling when retries function return false
+      expect(fn).toHaveBeenCalledTimes(3);
 
-    // should call onFail callback
-    expect(onFail).toHaveBeenCalledTimes(1);
+      // should receive the correct parameters
+      expect(retries.mock.calls).toEqual([
+        [{ retried: 0 }],
+        [{ retried: 1 }],
+        [{ retried: 2 }],
+      ]);
+
+      // should call onFail callback
+      expect(onFail).toHaveBeenCalledTimes(1);
+      expect(onFail.mock.lastCall).toEqual([type]);
+    }
   });
 
   it('should work when the validate is passed', () => {
@@ -71,15 +89,14 @@ describe('poll', () => {
       .mockReturnValueOnce(true);
     const validate = vi.fn((result) => result);
     const onSuccess = vi.fn();
-    const pollFn = poll({
+
+    vi.useFakeTimers();
+    poll({
       fn,
       validate,
       interval: 1000,
       onSuccess,
     });
-
-    vi.useFakeTimers();
-    pollFn();
     vi.runAllTimers();
     vi.useRealTimers();
 
@@ -99,15 +116,14 @@ describe('poll', () => {
       .mockResolvedValueOnce(true);
     const validate = vi.fn((result) => result);
     const onSuccess = vi.fn();
-    const pollFn = poll({
+
+    vi.useFakeTimers();
+    poll({
       fn,
       validate,
       interval: 1000,
       onSuccess,
     });
-
-    vi.useFakeTimers();
-    pollFn();
     await vi.runAllTimersAsync();
     vi.useRealTimers();
 
@@ -126,14 +142,13 @@ describe('poll', () => {
       .mockResolvedValueOnce(false)
       .mockResolvedValueOnce(true);
     const validate = vi.fn((result) => result);
-    const pollFn = poll({
+
+    vi.useFakeTimers();
+    const promise = poll({
       fn,
       validate,
       interval: 1000,
     });
-
-    vi.useFakeTimers();
-    const promise = pollFn();
     await vi.runAllTimersAsync();
 
     // should return promise
@@ -143,20 +158,42 @@ describe('poll', () => {
   it('should work after calling clear method', async () => {
     const fn = vi.fn();
     const onCancel = vi.fn();
-    const pollFn = poll({
+
+    vi.useFakeTimers();
+    const { cancel } = poll({
       fn,
       interval: 1000,
       onCancel,
     });
-
-    vi.useFakeTimers();
-    pollFn();
     vi.advanceTimersToNextTimer();
-    pollFn.cancel();
+    cancel();
     expect(vi.getTimerCount()).toBe(0);
     vi.useRealTimers();
 
     // should call onCancel callback
     expect(onCancel).toBeCalledTimes(1);
+  });
+
+  it('create poll function', async () => {
+    const fn = vi.fn().mockRejectedValue('error');
+    const retries = 5;
+    const concurrency = 4;
+
+    vi.useFakeTimers();
+    const pollFn = poll.create({
+      fn,
+      retries,
+      interval: 1000,
+    });
+
+    for (let i = 0; i < concurrency; i++) {
+      const promise = pollFn();
+      expect(promise).rejects.toThrowError('error');
+    }
+
+    await vi.runAllTimersAsync();
+    vi.useRealTimers();
+
+    expect(fn).toHaveBeenCalledTimes((retries + 1) * concurrency);
   });
 });
