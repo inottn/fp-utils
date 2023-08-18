@@ -9,7 +9,7 @@ describe('retry', () => {
   it('should retry when the returned promise is rejected', async () => {
     const fn = vi.fn().mockRejectedValue('error');
     const retries = 10;
-    const retryFn = retry(fn, retries);
+    const retryFn = retry.create(fn, retries);
     await expect(retryFn()).rejects.toThrow('error');
     expect(fn).toBeCalledTimes(retries + 1);
     await expect(retryFn()).rejects.toThrow('error');
@@ -23,8 +23,7 @@ describe('retry', () => {
       .mockRejectedValueOnce('error')
       .mockResolvedValueOnce('resolved');
 
-    const retryFn = retry(fn, 4);
-    await expect(retryFn()).resolves.toBe('resolved');
+    await expect(retry(fn, 4)).resolves.toBe('resolved');
     expect(fn).toBeCalledTimes(3);
   });
 
@@ -38,8 +37,7 @@ describe('retry', () => {
       .mockRejectedValueOnce('error')
       .mockResolvedValueOnce('resolved');
 
-    const retryFn = retry(fn, 4, interval);
-    retryFn();
+    retry(fn, 4, interval);
     await vi.advanceTimersByTimeAsync(interval);
     expect(fn).toBeCalledTimes(2);
     await vi.advanceTimersByTimeAsync(interval);
@@ -59,8 +57,7 @@ describe('retry', () => {
       .mockRejectedValueOnce('error')
       .mockResolvedValueOnce('resolved');
 
-    const retryFn = retry(fn, 4, intervalFn);
-    retryFn();
+    retry(fn, 4, intervalFn);
     await vi.advanceTimersByTimeAsync(interval);
     expect(fn).toBeCalledTimes(2);
     expect(intervalFn.mock.calls).toEqual([[{ retried: 0 }], [{ retried: 1 }]]);
