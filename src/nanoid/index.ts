@@ -5,7 +5,7 @@
 const urlAlphabet =
   'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict';
 
-export function uuid(size = 16, alphabet = urlAlphabet) {
+export function nanoid(size = 16, alphabet = urlAlphabet) {
   let id = '';
   // A compact alternative for `for (var i = 0; i < step; i++)`.
   let i = size;
