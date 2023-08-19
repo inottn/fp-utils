@@ -1,6 +1,7 @@
 export * from './cache';
 export * from './clamp';
 export * from './lock';
+export * from './nanoid';
 export * from './noop';
 export * from './poll';
 export * from './retry';
@@ -9,7 +10,6 @@ export * from './sleep';
 export * from './suspend';
 export * from './toArray';
 export * from './toShuffled';
-export * from './uuid';
 export * from './withResolvers';
 export * from './utils';
 export type * from './types';
