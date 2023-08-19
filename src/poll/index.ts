@@ -2,7 +2,7 @@ import { withResolvers } from '../withResolvers';
 import { isFunction, isPromise } from '../utils';
 import type { MaybePromise } from '../types';
 
-export type pollOptions<T> = {
+export type PollOptions<T> = {
   fn: (args: { retried: number; cancel: () => void }) => MaybePromise<T>;
   validate?: (value: T) => boolean;
   interval: number | ((args: { retried: number }) => number);
@@ -12,7 +12,7 @@ export type pollOptions<T> = {
   onCancel?: () => void;
 };
 
-export function poll<T>(args: pollOptions<T>) {
+export function poll<T>(args: PollOptions<T>) {
   const { fn, validate, interval, retries, onCancel, onSuccess, onFail } = args;
   const { promise, resolve, reject } = withResolvers<T>();
   let retried = 0;
@@ -56,7 +56,7 @@ export function poll<T>(args: pollOptions<T>) {
   return Object.assign(promise, { cancel });
 }
 
-poll.create = function <T>(args: pollOptions<T>) {
+poll.create = function <T>(args: PollOptions<T>) {
   return function () {
     return poll(args);
   };

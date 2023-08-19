@@ -27,75 +27,93 @@ describe('cache', () => {
     expect(await cacheFn()).toBe(1);
     expect(fn).toBeCalledTimes(1);
 
-    fn();
+    expect(await cacheFn('test')).toBe(2);
     expect(fn).toBeCalledTimes(2);
+
+    fn();
+    expect(fn).toBeCalledTimes(3);
     expect(await cacheFn()).toBe(1);
+    expect(await cacheFn('test')).toBe(2);
   });
 
   it('should return the same promise when the returned promise is pending', async () => {
-    let cnt = 0;
-    const fn = () => {
-      cnt++;
-      return Promise.resolve(cnt);
-    };
+    const fn = vi.fn().mockResolvedValue('cached');
     const cacheFn = cache(fn);
-    expect(cnt).toBe(0);
+    expect(fn).toBeCalledTimes(0);
     const promise1 = cacheFn();
     const promise2 = cacheFn();
     expect(promise1).toBe(promise2);
+    expect(fn).toBeCalledTimes(1);
+
+    const promise3 = cacheFn('test');
+    const promise4 = cacheFn('test');
+    expect(fn).toBeCalledTimes(2);
+    expect(promise1).not.toBe(promise3);
+    expect(promise3).toBe(promise4);
   });
 
   it('should clear cache after calling clear method', async () => {
-    let cnt = 0;
-    const fn = () => {
-      cnt++;
-      return Promise.resolve(cnt);
-    };
+    const fn = vi.fn().mockResolvedValue('cached');
     const cacheFn = cache(fn);
-    expect(cnt).toBe(0);
-    expect(await cacheFn()).toBe(1);
-    expect(cnt).toBe(1);
+    expect(fn).toBeCalledTimes(0);
+    await cacheFn();
+    expect(fn).toBeCalledTimes(1);
+    await cacheFn();
+    expect(fn).toBeCalledTimes(1);
+    await cacheFn('test');
+    expect(fn).toBeCalledTimes(2);
+    await cacheFn('test');
+    expect(fn).toBeCalledTimes(2);
+    await cacheFn('test', 'test');
+    expect(fn).toBeCalledTimes(3);
+    await cacheFn('test', 'test');
+    expect(fn).toBeCalledTimes(3);
 
     cacheFn.clear();
-    expect(await cacheFn()).toBe(2);
-    expect(cnt).toBe(2);
+    await cacheFn();
+    expect(fn).toBeCalledTimes(4);
+    await cacheFn('test');
+    expect(fn).toBeCalledTimes(5);
   });
 
-  it('should retry when the returned promise is fulfilled', async () => {
-    let cnt = 0;
-    const fn = () => {
-      cnt++;
-      return Promise.resolve(cnt);
-    };
+  it('should delete the specified cache after calling delete method', async () => {
+    const fn = vi.fn().mockResolvedValue('cached');
     const cacheFn = cache(fn);
-    cacheFn();
-    expect(cnt).toBe(1);
+    expect(fn).toBeCalledTimes(0);
+    await cacheFn();
+    expect(fn).toBeCalledTimes(1);
+    await cacheFn();
+    expect(fn).toBeCalledTimes(1);
+    await cacheFn('test');
+    expect(fn).toBeCalledTimes(2);
+    await cacheFn('test');
+    expect(fn).toBeCalledTimes(2);
+    await cacheFn('test', 'test');
+    expect(fn).toBeCalledTimes(3);
+    await cacheFn('test', 'test');
+    expect(fn).toBeCalledTimes(3);
 
-    cacheFn.retry();
-    expect(await cacheFn()).toBe(1);
-    expect(cnt).toBe(1);
-
-    cacheFn.retry();
-    expect(await cacheFn()).toBe(2);
-    expect(cnt).toBe(2);
+    cacheFn.delete('test', 'test');
+    await cacheFn();
+    expect(fn).toBeCalledTimes(3);
+    await cacheFn('test');
+    expect(fn).toBeCalledTimes(3);
+    await cacheFn('test', 'test');
+    expect(fn).toBeCalledTimes(4);
   });
 
   it('should refresh after calling clear method', async () => {
-    let cnt = 0;
-    const fn = () => {
-      cnt++;
-      return Promise.resolve(cnt);
-    };
+    const fn = vi.fn().mockResolvedValue('cached');
     const cacheFn = cache(fn);
     cacheFn();
-    expect(cnt).toBe(1);
+    expect(fn).toBeCalledTimes(1);
 
     cacheFn.refresh();
-    expect(await cacheFn()).toBe(2);
-    expect(cnt).toBe(2);
+    await cacheFn();
+    expect(fn).toBeCalledTimes(2);
 
     cacheFn.refresh();
-    expect(await cacheFn()).toBe(3);
-    expect(cnt).toBe(3);
+    await cacheFn();
+    expect(fn).toBeCalledTimes(3);
   });
 });
