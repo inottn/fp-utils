@@ -7,6 +7,7 @@ const entries = ['./src/index.ts'];
 const plugins = [
   commonjs(),
   esbuild({
+    minify: true,
     target: 'node14',
   }),
 ];
