@@ -23,23 +23,31 @@ interface Cache<Key, Value> {
 
 type CacheKey = any;
 
+type CachedData<AwaitedType> = {
+  promise: Promise<AwaitedType>;
+  loading: boolean;
+};
+
 type CacheOptions<Args extends unknown[], Result> = {
-  getKey: (...args: Args) => unknown;
-  cache: Cache<CacheKey, Result>;
+  getKey?: (...args: Args) => unknown;
+  cache?: Cache<CacheKey, CachedData<Result>>;
 };
 
 export function cache<Args extends unknown[], AwaitedType>(
   fn: (...args: Args) => Promise<AwaitedType>,
-  options?: CacheOptions<Args, Promise<AwaitedType>>,
+  options?: CacheOptions<Args, AwaitedType>,
 ) {
-  const cache = options?.cache ?? new Map<CacheKey, Promise<AwaitedType>>();
+  const cache = options?.cache ?? new Map<CacheKey, CachedData<AwaitedType>>();
   const getKey = (...args: Args) =>
     options?.getKey ? options.getKey(...args) : JSON.stringify(args);
 
   const setCache = (key: any, ...args: Args) => {
     const promise = fn(...args);
-    promise.catch(() => cache.delete(key));
-    cache.set(key, promise);
+    const data: CachedData<AwaitedType> = { promise, loading: true };
+
+    promise.then(() => (data.loading = false)).catch(() => cache.delete(key));
+    cache.set(key, data);
+
     return promise;
   };
 
@@ -53,9 +61,20 @@ export function cache<Args extends unknown[], AwaitedType>(
     return setCache(key, ...args);
   };
 
+  const retry = (...args: Args) => {
+    const key = getKey(...args);
+    const cachedData = cache.get(key);
+    if (!cachedData || cachedData.loading === false) {
+      cache.delete(key);
+      return setCache(key, ...args);
+    }
+    return cachedData.promise;
+  };
+
   const returnFn = (...args: Args) => {
     const key = getKey(...args);
-    if (cache.has(key)) return cache.get(key);
+    const cachedData = cache.get(key);
+    if (cachedData) return cachedData.promise;
     return setCache(key, ...args);
   };
 
@@ -65,6 +84,7 @@ export function cache<Args extends unknown[], AwaitedType>(
   };
   returnFn.clear = clear;
   returnFn.refresh = refresh;
+  returnFn.retry = retry;
 
   return returnFn;
 }

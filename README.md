@@ -1,3 +1,9 @@
+<p align="center">
+  <img alt="logo" src="https://fastly.jsdelivr.net/npm/@inottn/assets/fp-utils/logo.svg" width="420" style="margin-bottom: 10px;">
+</p>
+
+<p align="center">A js utils library</p>
+
 ## Install
 
 Using `pnpm` to install:

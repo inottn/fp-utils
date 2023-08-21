@@ -102,7 +102,7 @@ describe('cache', () => {
     expect(fn).toBeCalledTimes(4);
   });
 
-  it('should refresh after calling clear method', async () => {
+  it('should refresh cache after calling clear method', async () => {
     const fn = vi.fn().mockResolvedValue('cached');
     const cacheFn = cache(fn);
     cacheFn();
@@ -115,5 +115,19 @@ describe('cache', () => {
     cacheFn.refresh();
     await cacheFn();
     expect(fn).toBeCalledTimes(3);
+  });
+
+  it('should retry when the returned promise is fulfilled', async () => {
+    const fn = vi.fn().mockResolvedValue('cached');
+    const cacheFn = cache(fn);
+    cacheFn();
+    expect(fn).toBeCalledTimes(1);
+
+    cacheFn.retry();
+    await cacheFn();
+    expect(fn).toBeCalledTimes(1);
+
+    cacheFn.retry();
+    expect(fn).toBeCalledTimes(2);
   });
 });
