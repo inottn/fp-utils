@@ -8,7 +8,7 @@ const plugins = [
   commonjs(),
   esbuild({
     minify: true,
-    target: 'node14',
+    target: 'chrome55',
   }),
 ];
 
