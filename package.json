@@ -5,6 +5,7 @@
   "description": "A js utils library",
   "author": "inottn<https://github.com/inottn>",
   "homepage": "https://github.com/inottn/fp-utils",
+  "type": "module",
   "main": "dist/index-cjs.js",
   "module": "dist/index-esm.js",
   "types": "index.d.ts",
