@@ -24,8 +24,9 @@ describe('lock', () => {
     expect(lockFn.isLocked()).toBe(true);
 
     lockFn.unlock();
-    lockFn();
     expect(fn).toBeCalled();
+    lockFn();
+    expect(fn).toBeCalledTimes(2);
     expect(lockFn.isLocked()).toBe(false);
   });
 
@@ -75,5 +76,23 @@ describe('lock', () => {
     lockFn.unlock();
     lockFn.lock();
     expect(unlockPromise).not.toBe(lockFn.waitForUnlock());
+  });
+
+  it('should release', async () => {
+    const fn = vi.fn();
+    const lockFn = lock(fn);
+    lockFn.lock();
+    lockFn();
+    expect(fn).not.toBeCalled();
+    expect(lockFn.isLocked()).toBe(true);
+
+    lockFn();
+    lockFn();
+    lockFn();
+
+    lockFn.release();
+    lockFn.unlock();
+    expect(fn).not.toBeCalled();
+    expect(lockFn.isLocked()).toBe(false);
   });
 });

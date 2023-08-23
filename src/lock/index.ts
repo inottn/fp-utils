@@ -3,7 +3,7 @@ import { isPromise } from '../utils';
 import type { MaybePromise } from '../types';
 
 export function lock<Args extends unknown[], AwaitedType>(
-  fn: (...args: Args) => MaybePromise<AwaitedType>
+  fn: (...args: Args) => MaybePromise<AwaitedType>,
 ) {
   let locked = false;
   let timer: ReturnType<typeof setTimeout>;
@@ -38,6 +38,10 @@ export function lock<Args extends unknown[], AwaitedType>(
     flushQueue();
   };
 
+  const release = () => {
+    queue.length = 0;
+  };
+
   const waitForUnlock = () => {
     return unlockPromise;
   };
@@ -67,6 +71,7 @@ export function lock<Args extends unknown[], AwaitedType>(
   returnFn.unlock = unlock;
   returnFn.waitForUnlock = waitForUnlock;
   returnFn.isLocked = isLocked;
+  returnFn.release = release;
 
   return returnFn;
 }
