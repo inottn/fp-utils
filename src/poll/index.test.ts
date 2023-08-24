@@ -19,8 +19,7 @@ describe('poll', () => {
       const onFail = vi.fn();
 
       vi.useFakeTimers();
-      const promise = poll({
-        fn,
+      const promise = poll(fn, {
         retries,
         interval: 1000,
         onFail,
@@ -55,8 +54,7 @@ describe('poll', () => {
       const onFail = vi.fn();
 
       vi.useFakeTimers();
-      const promise = poll({
-        fn,
+      const promise = poll(fn, {
         retries,
         interval: 1000,
         onFail,
@@ -91,8 +89,7 @@ describe('poll', () => {
     const onSuccess = vi.fn();
 
     vi.useFakeTimers();
-    poll({
-      fn,
+    poll(fn, {
       validate,
       interval: 1000,
       onSuccess,
@@ -118,8 +115,7 @@ describe('poll', () => {
     const onSuccess = vi.fn();
 
     vi.useFakeTimers();
-    poll({
-      fn,
+    poll(fn, {
       validate,
       interval: 1000,
       onSuccess,
@@ -144,8 +140,7 @@ describe('poll', () => {
     const validate = vi.fn((result) => result);
 
     vi.useFakeTimers();
-    const promise = poll({
-      fn,
+    const promise = poll(fn, {
       validate,
       interval: 1000,
     });
@@ -160,8 +155,7 @@ describe('poll', () => {
     const onCancel = vi.fn();
 
     vi.useFakeTimers();
-    const { cancel } = poll({
-      fn,
+    const { cancel } = poll(fn, {
       interval: 1000,
       onCancel,
     });
@@ -180,8 +174,7 @@ describe('poll', () => {
     const concurrency = 4;
 
     vi.useFakeTimers();
-    const pollFn = poll.create({
-      fn,
+    const pollFn = poll.create(fn, {
       retries,
       interval: 1000,
     });
