@@ -45,7 +45,11 @@ export function cache<Args extends unknown[], AwaitedType>(
     const promise = fn(...args);
     const data: CachedData<AwaitedType> = { promise, loading: true };
 
-    promise.then(() => (data.loading = false)).catch(() => cache.delete(key));
+    promise
+      .then(() => (data.loading = false))
+      .catch(() => {
+        if (cache.get(key)?.promise === promise) cache.delete(key);
+      });
     cache.set(key, data);
 
     return promise;
