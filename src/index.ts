@@ -3,6 +3,7 @@ export * from './clamp';
 export * from './lock';
 export * from './nanoid';
 export * from './noop';
+export * from './pick';
 export * from './poll';
 export * from './retry';
 export * from './shuffle';
